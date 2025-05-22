@@ -24,10 +24,6 @@ dist-ssr
 *.sw?
 
 # Personal Additions
-.venv
-__pycache__
-ISSUE_TEMPLATE.md
 .env
 project_notes
-testing.py
 dev_journal
