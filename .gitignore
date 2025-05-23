@@ -24,6 +24,4 @@ dist-ssr
 *.sw?
 
 # Personal Additions
-.env
-project_notes
-dev_journal
+.dev
