@@ -8,6 +8,7 @@ function AlertCreationPrompt({
   setAlertsRefresh,
   setAlertsSearchInput,
   apiUrl,
+  userId,
 }) {
   const [form, setForm] = useState({
     ticker: "",
@@ -77,6 +78,7 @@ function AlertCreationPrompt({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          user_id: userId,
           ticker: form.ticker.toUpperCase(),
           price: parseFloat(form.price),
           direction: form.type,
