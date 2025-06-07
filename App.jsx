@@ -6,6 +6,7 @@ import AlertsArea from "./Components/AlertsArea/AlertsArea";
 import AlertCreationPrompt from "./Components/AlertCreationPrompt/AlertCreationPrompt";
 
 const apiUrl = import.meta.env.VITE_API_URL;
+const USER_ID = 1; // Temporary user ID until authentication is implemented
 
 function App() {
   const [showAlertCreationPrompt, setShowAlertCreationPrompt] = useState(false);
@@ -38,6 +39,7 @@ function App() {
           alertsSearchInput={alertsSearchInput}
           setAlertsSearchInput={setAlertsSearchInput}
           apiUrl={apiUrl}
+          userId={USER_ID}
         />
       </div>
       {showAlertCreationPrompt && (
@@ -46,6 +48,7 @@ function App() {
           setAlertsRefresh={setAlertsRefresh}
           setAlertsSearchInput={setAlertsSearchInput}
           apiUrl={apiUrl}
+          userId={USER_ID}
         />
       )}
     </>

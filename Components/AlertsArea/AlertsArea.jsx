@@ -10,6 +10,7 @@ function AlertsArea({
   alertsSearchInput,
   setAlertsSearchInput,
   apiUrl,
+  userId,
 }) {
   const [alerts, setAlerts] = useState([]);
 
@@ -56,7 +57,7 @@ function AlertsArea({
     } else {
       try {
         const api_response = await fetch(
-          `${apiUrl}/alerts?search_term=${trimmed}`,
+          `${apiUrl}/alerts?user_id=${userId}&search_term=${trimmed}`,
         );
         const retrieved_alerts = await api_response.json();
         console.log("Retrieved alerts:", retrieved_alerts);
