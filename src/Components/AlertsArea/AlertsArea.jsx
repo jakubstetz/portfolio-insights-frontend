@@ -14,10 +14,27 @@ function AlertsArea({
 }) {
   const [alerts, setAlerts] = useState([]);
 
-  useEffect(() => {
-    // Load alerts on mount and when refresh flag changes
-    searchHandler("");
-  }, [alertsRefresh]);
+  const searchHandler = async (search_term) => {
+    const trimmed = search_term.trim().toUpperCase();
+    setAlertsSearchInput(trimmed);
+    const isValidTicker = /^$|^[A-Z]{1,10}$/.test(trimmed);
+
+    if (!isValidTicker) {
+      toast.dismiss();
+      toast.error("Invalid search.");
+    } else {
+      try {
+        const api_response = await fetch(
+          `${apiUrl}/alerts?user_id=${userId}&search_term=${trimmed}`,
+        );
+        const retrieved_alerts = await api_response.json();
+        console.log("Retrieved alerts:", retrieved_alerts);
+        setAlerts(retrieved_alerts);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
 
   const deleteHandler = async (alert_id) => {
     try {
@@ -46,27 +63,10 @@ function AlertsArea({
     }
   };
 
-  const searchHandler = async (search_term) => {
-    const trimmed = search_term.trim().toUpperCase();
-    setAlertsSearchInput(trimmed);
-    const isValidTicker = /^$|^[A-Z]{1,10}$/.test(trimmed);
-
-    if (!isValidTicker) {
-      toast.dismiss();
-      toast.error("Invalid search.");
-    } else {
-      try {
-        const api_response = await fetch(
-          `${apiUrl}/alerts?user_id=${userId}&search_term=${trimmed}`,
-        );
-        const retrieved_alerts = await api_response.json();
-        console.log("Retrieved alerts:", retrieved_alerts);
-        setAlerts(retrieved_alerts);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-  };
+  useEffect(() => {
+    // Load alerts on mount and when refresh flag changes
+    searchHandler("");
+  }, [alertsRefresh]);
 
   return (
     <div id="alerts-area">

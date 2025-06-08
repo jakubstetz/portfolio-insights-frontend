@@ -75,7 +75,7 @@ function Chart({ chartData, chartIsLoading }) {
             type="linear"
             dataKey="close"
             stroke="#00ff65"
-            dot={({ index, cx, cy, payload }) =>
+            dot={({ index, cx, cy }) =>
               index === chartData.length - 1 ? (
                 <circle
                   key={`last-dot`}
