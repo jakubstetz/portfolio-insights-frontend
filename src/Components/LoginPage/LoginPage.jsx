@@ -35,7 +35,7 @@ function LoginPage({ apiUrl }) {
           throw new Error(data.detail || "Login failed");
         }
 
-        login(data.token.access_token, { username });
+        login(data.access_token, { username });
       } else {
         // Handle registration
         const response = await fetch(`${apiUrl}/register`, {
