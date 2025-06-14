@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import toast from "react-hot-toast";
 import { ClipLoader } from "react-spinners";
 import "./AlertCreationPrompt.css";
+import AuthContext from "../../contexts/AuthContext";
 
 function AlertCreationPrompt({
   onClose,
   setAlertsRefresh,
   setAlertsSearchInput,
   apiUrl,
-  userId,
 }) {
+  const { getToken } = useContext(AuthContext);
   const [form, setForm] = useState({
     ticker: "",
     price: "",
@@ -66,19 +67,21 @@ function AlertCreationPrompt({
             maxWidth: "none",
           },
         });
-        setCheckingAlertValidity(false);
         return;
       }
     } catch (err) {
       console.error(err);
     }
+    setCheckingAlertValidity(false);
 
     try {
       const api_response = await fetch(`${apiUrl}/alerts`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
         body: JSON.stringify({
-          user_id: userId,
           ticker: form.ticker.toUpperCase(),
           price: parseFloat(form.price),
           direction: form.type,

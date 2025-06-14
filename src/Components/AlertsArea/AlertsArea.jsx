@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import toast from "react-hot-toast";
 import "./AlertsArea.css";
 import SearchBar from "../SearchBar/SearchBar";
 import AlertsManager from "../AlertsManager/AlertsManager";
+import AuthContext from "../../contexts/AuthContext";
 
 function AlertsArea({
   onNewAlert,
@@ -10,8 +11,8 @@ function AlertsArea({
   alertsSearchInput,
   setAlertsSearchInput,
   apiUrl,
-  userId,
 }) {
+  const { getToken } = useContext(AuthContext);
   const [alerts, setAlerts] = useState([]);
 
   const searchHandler = async (search_term) => {
@@ -25,7 +26,13 @@ function AlertsArea({
     } else {
       try {
         const api_response = await fetch(
-          `${apiUrl}/alerts?user_id=${userId}&search_term=${trimmed}`,
+          `${apiUrl}/alerts?search_term=${trimmed}`,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+              "Content-Type": "application/json",
+            },
+          },
         );
         const retrieved_alerts = await api_response.json();
         console.log("Retrieved alerts:", retrieved_alerts);
@@ -40,7 +47,10 @@ function AlertsArea({
     try {
       const api_response = await fetch(`${apiUrl}/alerts?id=${alert_id}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+          "Content-Type": "application/json",
+        },
       });
 
       if (api_response.ok) {
