@@ -67,12 +67,12 @@ function AlertCreationPrompt({
             maxWidth: "none",
           },
         });
+        setCheckingAlertValidity(false);
         return;
       }
     } catch (err) {
       console.error(err);
     }
-    setCheckingAlertValidity(false);
 
     try {
       const api_response = await fetch(`${apiUrl}/alerts`, {
