@@ -13,4 +13,43 @@ h1 {
   text-shadow:
     0 1px 2px rgba(0, 0, 0, 0.6),
     0 0 6px rgba(56, 189, 248, 0.4);
+  margin: 0 auto;
+}
+
+.user-info {
+  position: absolute;
+  right: 20px;
+  top: 23px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-radius: 14px;
+  padding: 10px 16px;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+  background-color: #0e1828;
+}
+
+.user-info-placeholder {
+  width: 250px;
+}
+
+.username {
+  color: #a5f3fc;
+  font-size: 0.9rem;
+}
+
+.logout-button {
+  background-color: transparent;
+  border: 1px solid #64748b;
+  color: #e2e8f0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: #94a3b8;
 }
