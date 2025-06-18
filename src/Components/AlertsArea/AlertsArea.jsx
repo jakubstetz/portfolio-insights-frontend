@@ -4,6 +4,7 @@ import "./AlertsArea.css";
 import SearchBar from "../SearchBar/SearchBar";
 import AlertsManager from "../AlertsManager/AlertsManager";
 import AuthContext from "../../contexts/AuthContext";
+import { fetchWithAuth } from "../../utils/api";
 
 function AlertsArea({
   onNewAlert,
@@ -12,7 +13,7 @@ function AlertsArea({
   setAlertsSearchInput,
   apiUrl,
 }) {
-  const { getToken, logout } = useContext(AuthContext);
+  const { getToken } = useContext(AuthContext);
   const [alerts, setAlerts] = useState([]);
 
   const searchHandler = async (search_term) => {
@@ -25,26 +26,17 @@ function AlertsArea({
       toast.error("Invalid search.");
     } else {
       try {
-        const api_response = await fetch(
+        const api_response = await fetchWithAuth(
           `${apiUrl}/alerts?search_term=${trimmed}`,
           {
             headers: {
               Authorization: `Bearer ${getToken()}`,
-              "Content-Type": "application/json",
             },
           },
         );
 
         if (!api_response.ok) {
           const errorData = await api_response.json();
-          if (
-            errorData.message === "Token expired" ||
-            errorData.message === "Invalid or expired token"
-          ) {
-            // Clear auth state and trigger re-render
-            logout();
-            return;
-          }
           throw new Error(errorData.message || "An error occurred");
         }
 
@@ -52,39 +44,40 @@ function AlertsArea({
         console.log("Retrieved alerts:", retrieved_alerts);
         setAlerts(retrieved_alerts);
       } catch (err) {
-        console.error(err);
-        toast.error("Failed to fetch alerts. Please try again.");
+        // If error message is "Unauthorized", it means that the session has expired
+        // In that case, error notification has already been handled by fetchWithAuth
+        if (err.message !== "Unauthorized") {
+          console.error(err);
+          toast.error("Failed to fetch alerts. Please try again.");
+        }
       }
     }
   };
 
   const deleteHandler = async (alert_id) => {
     try {
-      const api_response = await fetch(`${apiUrl}/alerts?id=${alert_id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-          "Content-Type": "application/json",
+      const api_response = await fetchWithAuth(
+        `${apiUrl}/alerts?id=${alert_id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
         },
-      });
+      );
 
       if (!api_response.ok) {
         const errorData = await api_response.json();
-        if (
-          errorData.message === "Token expired" ||
-          errorData.message === "Invalid or expired token"
-        ) {
-          logout();
-          return;
-        }
         throw new Error(errorData.message || "An error occurred");
       }
 
       // Refresh alerts after successful deletion
       searchHandler(alertsSearchInput);
     } catch (err) {
-      console.error(err);
-      toast.error("Failed to delete alert. Please try again.");
+      if (err.message !== "Unauthorized") {
+        console.error(err);
+        toast.error("Failed to delete alert. Please try again.");
+      }
     }
   };
 

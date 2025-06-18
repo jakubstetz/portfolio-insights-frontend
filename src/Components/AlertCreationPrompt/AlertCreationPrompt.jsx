@@ -3,6 +3,7 @@ import toast from "react-hot-toast";
 import { ClipLoader } from "react-spinners";
 import "./AlertCreationPrompt.css";
 import AuthContext from "../../contexts/AuthContext";
+import { fetchWithAuth } from "../../utils/api";
 
 function AlertCreationPrompt({
   onClose,
@@ -75,10 +76,9 @@ function AlertCreationPrompt({
     }
 
     try {
-      const api_response = await fetch(`${apiUrl}/alerts`, {
+      const api_response = await fetchWithAuth(`${apiUrl}/alerts`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({
@@ -102,7 +102,7 @@ function AlertCreationPrompt({
           style: {
             marginTop: "66px",
           },
-        }); // User notification
+        });
         closeWithAnimation(); // Close prompt after success
       } else {
         const error = await api_response.json();
@@ -115,9 +115,11 @@ function AlertCreationPrompt({
         console.error("Failed to create alert:", error.detail);
       }
     } catch (err) {
-      toast.dismiss();
-      toast.error("Network error. Please try again.");
-      console.error("Error:", err);
+      if (err.message !== "Unauthorized") {
+        toast.dismiss();
+        toast.error("Network error. Please try again.");
+        console.error("Error:", err);
+      }
     } finally {
       setCheckingAlertValidity(false);
     }
