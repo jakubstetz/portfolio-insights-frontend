@@ -12,7 +12,7 @@ function AlertsArea({
   setAlertsSearchInput,
   apiUrl,
 }) {
-  const { getToken } = useContext(AuthContext);
+  const { getToken, logout } = useContext(AuthContext);
   const [alerts, setAlerts] = useState([]);
 
   const searchHandler = async (search_term) => {
@@ -34,11 +34,26 @@ function AlertsArea({
             },
           },
         );
+
+        if (!api_response.ok) {
+          const errorData = await api_response.json();
+          if (
+            errorData.message === "Token expired" ||
+            errorData.message === "Invalid or expired token"
+          ) {
+            // Clear auth state and trigger re-render
+            logout();
+            return;
+          }
+          throw new Error(errorData.message || "An error occurred");
+        }
+
         const retrieved_alerts = await api_response.json();
         console.log("Retrieved alerts:", retrieved_alerts);
         setAlerts(retrieved_alerts);
       } catch (err) {
         console.error(err);
+        toast.error("Failed to fetch alerts. Please try again.");
       }
     }
   };
@@ -53,23 +68,23 @@ function AlertsArea({
         },
       });
 
-      if (api_response.ok) {
-        toast.dismiss();
-        toast.success("Alert deleted.");
-        console.log(`Alert #${alert_id} deleted.`);
-        // Clear search input
-        setAlertsSearchInput("");
-        searchHandler(""); // Refresh displayed list of alerts
-      } else {
-        const error = await api_response.json();
-        toast.dismiss();
-        toast.error(error.detail || "Failed to delete alert.");
-        console.error("Failed to delete alert:", error.detail);
+      if (!api_response.ok) {
+        const errorData = await api_response.json();
+        if (
+          errorData.message === "Token expired" ||
+          errorData.message === "Invalid or expired token"
+        ) {
+          logout();
+          return;
+        }
+        throw new Error(errorData.message || "An error occurred");
       }
+
+      // Refresh alerts after successful deletion
+      searchHandler(alertsSearchInput);
     } catch (err) {
-      toast.dismiss();
-      toast.error("Network error.");
-      console.error("Error:", err);
+      console.error(err);
+      toast.error("Failed to delete alert. Please try again.");
     }
   };
 

@@ -10,6 +10,35 @@ function LoginPage({ apiUrl }) {
   const [loading, setLoading] = useState(false);
   const { login } = useContext(AuthContext);
 
+  const handleGuestLogin = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const formData = new URLSearchParams();
+      formData.append("username", "Guest");
+      formData.append("password", "GuestPassword");
+
+      const response = await fetch(`${apiUrl}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Guest login failed");
+      }
+
+      login(data.access_token, { username: "Guest" });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -96,6 +125,15 @@ function LoginPage({ apiUrl }) {
             {loading ? "Processing..." : isLogin ? "Login" : "Register"}
           </button>
         </form>
+
+        <button
+          type="button"
+          className="auth-button guest-button"
+          onClick={handleGuestLogin}
+          disabled={loading}
+        >
+          Use Guest Account
+        </button>
 
         <div className="auth-switch">
           {isLogin ? "Don't have an account? " : "Already have an account? "}
