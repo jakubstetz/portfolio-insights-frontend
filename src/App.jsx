@@ -1,18 +1,37 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Toaster } from "react-hot-toast";
 import Header from "./Components/Header/Header";
 import ChartArea from "./Components/ChartArea/ChartArea";
 import AlertsArea from "./Components/AlertsArea/AlertsArea";
 import AlertCreationPrompt from "./Components/AlertCreationPrompt/AlertCreationPrompt";
+import LoginPage from "./Components/LoginPage/LoginPage";
+import AuthContext from "./contexts/AuthContext";
+import "./App.css";
 
 const apiUrl = import.meta.env.VITE_API_URL;
-const USER_ID = 1; // Temporary user ID until authentication is implemented
 
 function App() {
+  const { user, loading } = useContext(AuthContext);
   const [showAlertCreationPrompt, setShowAlertCreationPrompt] = useState(false);
   const [alertsRefresh, setAlertsRefresh] = useState(false); // Toggle whenever I want to refresh displayed alerts, i.e. when a new alert is created
   const [alertsSearchInput, setAlertsSearchInput] = useState(""); // AlertsArea search bar input
 
+  // Show loading state while checking authentication
+  if (loading) {
+    return <div className="loading-container">Loading...</div>;
+  }
+
+  // If not authenticated, show the login page
+  if (!user) {
+    return (
+      <>
+        <Header />
+        <LoginPage apiUrl={apiUrl} />
+      </>
+    );
+  }
+
+  // If authenticated, show the main application
   return (
     <>
       <Toaster
@@ -39,7 +58,7 @@ function App() {
           alertsSearchInput={alertsSearchInput}
           setAlertsSearchInput={setAlertsSearchInput}
           apiUrl={apiUrl}
-          userId={USER_ID}
+          userId={user.user_id}
         />
       </div>
       {showAlertCreationPrompt && (
@@ -48,7 +67,7 @@ function App() {
           setAlertsRefresh={setAlertsRefresh}
           setAlertsSearchInput={setAlertsSearchInput}
           apiUrl={apiUrl}
-          userId={USER_ID}
+          userId={user.user_id}
         />
       )}
     </>

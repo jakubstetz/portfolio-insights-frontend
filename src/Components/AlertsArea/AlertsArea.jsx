@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import toast from "react-hot-toast";
 import "./AlertsArea.css";
 import SearchBar from "../SearchBar/SearchBar";
 import AlertsManager from "../AlertsManager/AlertsManager";
+import AuthContext from "../../contexts/AuthContext";
+import { fetchWithAuth } from "../../utils/api";
 
 function AlertsArea({
   onNewAlert,
@@ -10,8 +12,8 @@ function AlertsArea({
   alertsSearchInput,
   setAlertsSearchInput,
   apiUrl,
-  userId,
 }) {
+  const { getToken } = useContext(AuthContext);
   const [alerts, setAlerts] = useState([]);
 
   const searchHandler = async (search_term) => {
@@ -24,42 +26,58 @@ function AlertsArea({
       toast.error("Invalid search.");
     } else {
       try {
-        const api_response = await fetch(
-          `${apiUrl}/alerts?user_id=${userId}&search_term=${trimmed}`,
+        const api_response = await fetchWithAuth(
+          `${apiUrl}/alerts?search_term=${trimmed}`,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          },
         );
+
+        if (!api_response.ok) {
+          const errorData = await api_response.json();
+          throw new Error(errorData.message || "An error occurred");
+        }
+
         const retrieved_alerts = await api_response.json();
         console.log("Retrieved alerts:", retrieved_alerts);
         setAlerts(retrieved_alerts);
       } catch (err) {
-        console.error(err);
+        // If error message is "Unauthorized", it means that the session has expired
+        // In that case, error notification has already been handled by fetchWithAuth
+        if (err.message !== "Unauthorized") {
+          console.error(err);
+          toast.error("Failed to fetch alerts. Please try again.");
+        }
       }
     }
   };
 
   const deleteHandler = async (alert_id) => {
     try {
-      const api_response = await fetch(`${apiUrl}/alerts?id=${alert_id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
+      const api_response = await fetchWithAuth(
+        `${apiUrl}/alerts?id=${alert_id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        },
+      );
 
-      if (api_response.ok) {
-        toast.dismiss();
-        toast.success("Alert deleted.");
-        console.log(`Alert #${alert_id} deleted.`);
-        // Clear search input
-        setAlertsSearchInput("");
-        searchHandler(""); // Refresh displayed list of alerts
-      } else {
-        const error = await api_response.json();
-        toast.dismiss();
-        toast.error(error.detail || "Failed to delete alert.");
-        console.error("Failed to delete alert:", error.detail);
+      if (!api_response.ok) {
+        const errorData = await api_response.json();
+        throw new Error(errorData.message || "An error occurred");
       }
+
+      // Refresh alerts after successful deletion
+      searchHandler(alertsSearchInput);
     } catch (err) {
-      toast.dismiss();
-      toast.error("Network error.");
-      console.error("Error:", err);
+      if (err.message !== "Unauthorized") {
+        console.error(err);
+        toast.error("Failed to delete alert. Please try again.");
+      }
     }
   };
 
