@@ -72,6 +72,12 @@ function AlertsArea({
       }
 
       // Refresh alerts after successful deletion
+      toast.dismiss();
+      toast.success("Alert deleted successfully!", {
+        style: {
+          marginTop: "66px",
+        },
+      });
       searchHandler(alertsSearchInput);
     } catch (err) {
       if (err.message !== "Unauthorized") {
