@@ -22,9 +22,14 @@ export const fetchWithAuth = async (url, options = {}) => {
   // If unauthorized (token invalid or expired), log the user out
   if (response.status === 401) {
     if (logoutFunction) {
+      toast.dismiss();
       logoutFunction();
       // Show a toast notification
-      toast.error("Your session has expired. Please log in again.");
+      toast.error("Your session has expired. Please log in again.", {
+        style: {
+          marginTop: "5px",
+        },
+      });
     }
     // Return a rejected promise to stop the parent async flow
     // Could throw an error instead, but returning a rejected promise is in-line with fetch's standard behavior
