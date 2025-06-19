@@ -1,4 +1,5 @@
 import { useState, useContext } from "react";
+import { toast } from "react-hot-toast";
 import AuthContext from "../../contexts/AuthContext";
 import "./LoginPage.css";
 
@@ -32,6 +33,7 @@ function LoginPage({ apiUrl }) {
       }
 
       login(data.access_token, { username: "Guest" });
+      toast.dismiss();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -82,6 +84,7 @@ function LoginPage({ apiUrl }) {
 
         login(data.token.access_token, data.user);
       }
+      toast.dismiss();
     } catch (err) {
       setError(err.message);
     } finally {

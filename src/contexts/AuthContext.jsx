@@ -9,7 +9,6 @@ const AuthContext = createContext();
 // Provider component to wrap app and supply auth state/functions to child components
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true); // True while checking localStorage
 
   // Log in: persist user and token in localStorage
   const login = (token, userData) => {
@@ -46,7 +45,6 @@ export function AuthProvider({ children }) {
         logout(); // Clear invalid data to avoid inconsistent state
       }
     }
-    setLoading(false);
   }, []);
 
   // Get token for API requests
@@ -54,7 +52,7 @@ export function AuthProvider({ children }) {
 
   // Provide state and actions to children
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, getToken }}>
+    <AuthContext.Provider value={{ user, login, logout, getToken }}>
       {children}
     </AuthContext.Provider>
   );
